@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 # Page setup
 st.set_page_config(page_title="AI Virality Analyzer", page_icon="🔥", layout="centered")
 
-# 🎨 PREMIUM UI
+# 🎨 UI
 st.markdown("""
 <style>
 .stApp {
@@ -12,37 +12,26 @@ st.markdown("""
 }
 h1 {
     text-align: center;
-    font-size: 40px;
     color: white;
-}
-.stTextArea textarea {
-    background-color: #1e293b;
-    color: white;
-    border-radius: 12px;
 }
 .stButton button {
     background: linear-gradient(90deg, #ff416c, #ff4b2b);
     color: white;
-    border-radius: 12px;
-    font-size: 16px;
+    border-radius: 10px;
 }
 </style>
 """, unsafe_allow_html=True)
 
-# Title
 st.title("AI Virality Analyzer 🦋")
 st.write("Analyze text, images, and videos for viral potential")
 
-# ✍️ Text input
 text = st.text_area("Enter your content", height=150)
-
-# 📁 File upload
 uploaded_file = st.file_uploader("Upload Image or Video", type=["jpg", "png", "mp4"])
 
-# Show uploaded content
+# Show file
 if uploaded_file:
     if uploaded_file.type.startswith("image"):
-        st.image(uploaded_file, caption="Uploaded Image", use_column_width=True)
+        st.image(uploaded_file)
     elif uploaded_file.type.startswith("video"):
         st.video(uploaded_file)
 
@@ -51,84 +40,131 @@ if st.button("🚀 Analyze"):
     if text.strip() == "" and not uploaded_file:
         st.warning("⚠️ Please enter content or upload a file")
     else:
-        score = 0
         feedback = []
 
-        # ===== TEXT ANALYSIS =====
+        # ===== SCORES =====
         hook_score = 0
         emotion_score = 0
         question_score = 0
         length_score = 0
         audience_score = 0
-
-        if text.strip() != "":
-            st.markdown("## ✍️ Text Analysis")
-
-            if text.lower().startswith(("stop", "wait", "don't", "do you")):
-                hook_score = 3
-                feedback.append("✅ Strong hook")
-            else:
-                feedback.append("❌ Add strong hook")
-
-            if any(word in text.lower() for word in ["amazing", "shocking", "secret", "life"]):
-                emotion_score = 2
-                feedback.append("✅ Emotional words present")
-            else:
-                feedback.append("❌ Add emotional words")
-
-            if "?" in text:
-                question_score = 2
-                feedback.append("✅ Question added")
-            else:
-                feedback.append("❌ Add a question")
-
-            if len(text) < 80:
-                length_score = 2
-                feedback.append("✅ Good length")
-            else:
-                feedback.append("❌ Make it shorter")
-
-            if "you" in text.lower():
-                audience_score = 1
-                feedback.append("✅ Targets audience")
-            else:
-                feedback.append("❌ Use 'you'")
-
-        # ===== FILE ANALYSIS =====
         file_score = 0
 
+        # ===== HOOK =====
+        hook_text = text[:50].lower()
+        if any(word in hook_text for word in ["stop", "wait", "don't", "you won't"]):
+            hook_score = 30
+            feedback.append("🔥 Strong hook in first 3 seconds")
+        else:
+            feedback.append("❌ Weak hook — improve opening line")
+
+        # ===== EMOTION =====
+        if any(word in text.lower() for word in ["amazing", "shocking", "secret", "life"]):
+            emotion_score = 20
+            feedback.append("✅ Emotional words present")
+        else:
+            feedback.append("❌ Add emotional triggers")
+
+        # ===== QUESTION =====
+        if "?" in text:
+            question_score = 20
+            feedback.append("✅ Question increases engagement")
+        else:
+            feedback.append("❌ Add a question")
+
+        # ===== LENGTH =====
+        if len(text) < 80:
+            length_score = 15
+            feedback.append("✅ Good short content")
+        else:
+            feedback.append("❌ Make content shorter")
+
+        # ===== AUDIENCE =====
+        if "you" in text.lower():
+            audience_score = 15
+            feedback.append("✅ Targets audience well")
+        else:
+            feedback.append("❌ Use 'you'")
+
+        # ===== FILE =====
         if uploaded_file:
-            st.markdown("## 📁 File Analysis")
-
             if uploaded_file.type.startswith("image"):
-                file_score = 2
+                file_score = 10
                 feedback.append("🖼️ Image boosts engagement")
-                feedback.append("👉 Use bright colors & text")
-
             elif uploaded_file.type.startswith("video"):
-                file_score = 3
-                feedback.append("🎥 Video highly engaging")
-                feedback.append("👉 Hook in first 3 sec")
-                feedback.append("👉 Keep under 30 sec")
+                file_score = 15
+                feedback.append("🎥 Video increases viral potential")
 
         # ===== FINAL SCORE =====
-        score = hook_score + emotion_score + question_score + length_score + audience_score + file_score
-        final_score = min(score, 10)
+        final_score = min(
+            hook_score + emotion_score + question_score + length_score + audience_score + file_score,
+            100
+        )
 
-        st.subheader(f"🔥 Viral Score: {final_score}/10")
-        st.progress(final_score / 10)
+        # ===== SCORE =====
+        st.subheader(f"🔥 Viral Score: {final_score}/100")
+        st.progress(final_score / 100)
+
+        st.caption("Score based on hook, emotion, engagement, and structure analysis")
+        st.caption("AI model simulates virality using engagement heuristics")
+        st.caption("Future version will use real AI models for video frame analysis and trend prediction")
+
+        # ===== VIRAL LEVEL =====
+        if final_score > 80:
+            st.success("🚀 High chance to go viral!")
+        elif final_score > 50:
+            st.warning("⚡ Moderate viral potential")
+        else:
+            st.error("❌ Low viral potential")
+
+        st.divider()
+
+        # ===== HOOK =====
+        st.markdown("### 🎬 Hook Analysis")
+        if hook_score > 0:
+            st.success("Strong first 3 seconds hook")
+        else:
+            st.error("Weak opening — improve first 3 seconds")
+
+        # ===== PACING =====
+        st.markdown("### ⏱️ Pacing Analysis")
+        if len(text) < 60:
+            st.success("Fast-paced content")
+        elif len(text) < 120:
+            st.warning("Moderate pacing")
+        else:
+            st.error("Too slow — reduce length")
+
+        st.divider()
+
+        # ===== THUMBNAIL =====
+        if uploaded_file and uploaded_file.type.startswith("image"):
+            st.markdown("### 🖼️ Thumbnail Rating")
+            thumb_score = 50 if uploaded_file.size > 100000 else 30
+            st.write(f"Thumbnail Score: {thumb_score}/100")
+            st.write("- Use bold text")
+            st.write("- Include human faces")
+            st.write("- Use bright contrast colors")
 
         st.divider()
 
         # ===== CHART =====
-        st.markdown("### 📊 Content Strength Analysis")
-
+        st.markdown("### 📊 Score Breakdown")
         labels = ["Hook", "Emotion", "Question", "Length", "Audience"]
-        values = [hook_score, emotion_score, question_score, length_score, audience_score]
+        values = [
+            hook_score or 5,
+            emotion_score or 5,
+            question_score or 5,
+            length_score or 5,
+            audience_score or 5
+        ]
 
         fig, ax = plt.subplots()
         ax.bar(labels, values)
-        ax.set_title("Virality Factors")
+
+        for i, v in enumerate(values):
+            ax.text(i, v + 1, str(v), ha='center')
+
         st.pyplot(fig)
 
         st.divider()
@@ -140,51 +176,90 @@ if st.button("🚀 Analyze"):
 
         st.divider()
 
-        # ===== IMPROVEMENT =====
-        improved = ""
+        # ===== CAPTION =====
+        st.markdown("### 📝 Caption Optimization")
+        st.write("👉 Keep it short (5–10 words)")
+        st.write("👉 Add curiosity + emotion")
+        st.write("👉 Include a question")
 
-        if text.strip() != "":
-            if hook_score == 0:
-                improved += "Stop scrolling! 😳🔥 "
-
-            improved += text
-
-            if question_score == 0:
-                improved += " Do you want to miss this?"
-
-            improved += " Don't miss this!"
+        # ===== COMPETITOR =====
+        st.markdown("### 🆚 Competitor Comparison")
+        st.write("Top viral content usually scores above 75.")
+        if final_score > 70:
+            st.success("Your content is ABOVE average 🔥")
         else:
-            improved = "Add catchy caption + strong hook!"
+            st.warning("Your content is BELOW top viral content ⚠️")
 
-        st.write("### ✨ Suggested Improvement:")
-        st.write(f"👉 {improved}")
-# ================= CHATBOT =================
+        # ===== HASHTAGS =====
+        st.markdown("### 🔥 Suggested Hashtags")
+        hashtags = ["#viral", "#fyp", "#trending"]
+
+        if "love" in text.lower():
+            hashtags.append("#love")
+        if "motivation" in text.lower():
+            hashtags.append("#motivation")
+        if "funny" in text.lower():
+            hashtags.append("#funny")
+        if "fitness" in text.lower():
+            hashtags.append("#fitness")
+
+        st.write(" ".join(hashtags))
+
+        # ===== AUDIO =====
+        st.markdown("### 🎵 Trending Audio")
+
+        if "motivation" in text.lower():
+            st.write("🎧 Motivation Beat 🔥")
+        elif "sad" in text.lower():
+            st.write("🎧 Emotional Piano 🎹")
+        elif "funny" in text.lower():
+            st.write("🎧 Meme Sound 😂")
+        else:
+            st.write("🎧 Viral Beat Drop")
+            st.write("🎧 Chill Remix")
+            st.write("🎧 Trending Reels Sound")
+
+        # ===== IMPROVED =====
+        improved = ""
+        if not text.lower().startswith(("stop", "wait", "don't")):
+            improved += "Stop scrolling! "
+        improved += text
+        if "?" not in text:
+            improved += " Do you want to miss this?"
+        improved += " 😳🔥 You won’t believe this!"
+
+        st.markdown("### ✨ Improved Version")
+        st.write(improved)
+
+        # ===== DOWNLOAD =====
+        report = f"""
+Viral Score: {final_score}/100
+
+Feedback:
+{chr(10).join(feedback)}
+
+Improved Version:
+{improved}
+"""
+        st.download_button("📥 Download Report", report, file_name="virality_report.txt")
+
+
+# ===== CHATBOT =====
 st.divider()
 st.markdown("## 🤖 AI Assistant")
 
 user_query = st.text_input("Ask about improving your content:")
 
 if user_query:
-    response = ""
-
     query = user_query.lower()
 
     if "hook" in query:
-        response = "👉 Start with strong hooks like: 'Stop scrolling!', 'Wait!', 'You won’t believe this!'"
-
+        st.write("👉 Use hooks like: 'Stop scrolling!', 'Wait!', 'You won’t believe this!'")
     elif "viral" in query:
-        response = "👉 Viral content needs emotion, curiosity, and a strong first line."
-
-    elif "improve" in query:
-        response = "👉 Add emojis 😳🔥, ask questions, and keep content short and engaging."
-
+        st.write("👉 Viral content needs emotion, curiosity, and strong opening")
     elif "video" in query:
-        response = "👉 Keep videos short (<30s), add captions, and grab attention in first 3 seconds."
-
-    elif "image" in query:
-        response = "👉 Use bright colors, bold text, and human faces for better engagement."
-
+        st.write("👉 Keep videos under 30 sec & hook in first 3 seconds")
+    elif "caption" in query:
+        st.write("👉 Keep captions short + emotional + curiosity-driven")
     else:
-        response = "👉 Try asking about hooks, captions, videos, or how to go viral!"
-
-    st.write("🤖:", response)
+        st.write("👉 Ask about hooks, captions, or viral tips!")
